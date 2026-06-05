@@ -1,0 +1,10 @@
+langchain==0.1.20
+langchain-core==0.1.51
+langchain-groq==0.1.7
+langchain-community==0.0.38
+langgraph==0.0.69
+streamlit==1.31.1
+python-dotenv==1.0.0
+requests==2.31.0
+langgraph-checkpoint-sqlite
+ddgs
