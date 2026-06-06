@@ -55,7 +55,7 @@ add_thread(st.session_state["thread_id"])
 
 # ============ Page Config ============
 st.set_page_config(
-    page_title="LangGraph Chatbot",
+    page_title="Agentic Chatbot",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -64,7 +64,7 @@ st.set_page_config(
 
 # ============ Sidebar ============
 with st.sidebar:
-    st.title("🤖 LangGraph Chatbot")
+    st.title("🤖 Agentic Chatbot")
     
     if st.button("➕ New Chat", use_container_width=True):
         reset_chat()
@@ -88,8 +88,8 @@ with st.sidebar:
 
 
 # ============ Main Chat Area ============
-st.header("🤖 LangGraph Chatbot")
-st.markdown("Ask me anything! I can search the web and fetch stock prices.")
+st.header("🤖 Agentic Chatbot")
+st.markdown("Ask me anything! I am an Agentic chatbot.")
 
 # Display conversation history
 for message in st.session_state["message_history"]:

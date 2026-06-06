@@ -4,6 +4,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import os
+from dotenv import load_dotenv
+
+# Load variables from .env into os.environ
+load_dotenv()
+
+# Tools api key
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+
 # LLM Configuration
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")

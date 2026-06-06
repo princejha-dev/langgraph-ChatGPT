@@ -8,3 +8,4 @@ python-dotenv
 requests
 langgraph-checkpoint-sqlite
 ddgs
+langchain_tavily
