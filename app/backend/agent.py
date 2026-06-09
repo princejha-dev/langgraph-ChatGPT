@@ -9,6 +9,7 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.prebuilt import ToolNode, tools_condition
+from langchain_core.messages.utils import trim_messages, count_tokens_approximately
 from .tools import tools
 
 # Load environment variables
@@ -17,6 +18,7 @@ load_dotenv()
 # Initialize LLM
 llm = ChatGroq(model=os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"))
 llm_with_tools = llm.bind_tools(tools)
+MAX_TOKENS = 5000
 
 
 # Define chat state
@@ -26,7 +28,15 @@ class ChatState(TypedDict):
 
 # Chat node
 def chat_node(state: ChatState):
-    messages = state["messages"]
+
+    #trim the lastes msg (according to MAX_TOKENS)
+    messages = trim_messages(
+        messages= state['messages'],
+        token_counter= count_tokens_approximately,
+        strategy= "last",
+        max_tokens= MAX_TOKENS
+    )
+
     response = llm_with_tools.invoke(messages)
     return {"messages": [response]}
 
