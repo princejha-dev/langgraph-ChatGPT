@@ -37,8 +37,12 @@ def chat_node(state: ChatState):
         max_tokens= MAX_TOKENS
     )
 
-    response = llm_with_tools.invoke(messages)
-    return {"messages": [response]}
+    try:
+        response = llm_with_tools.invoke(messages)
+        return {"messages": [response]}
+    except Exception as e:
+        print("Groq Error:", repr(e))
+        raise
 
 
 # Initialize tool node

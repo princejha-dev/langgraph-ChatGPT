@@ -117,28 +117,33 @@ if user_input:
         status_holder = {"box": None}
 
         def ai_only_stream():
-            for message_chunk, metadata in chatbot.stream(
-                {"messages": [HumanMessage(content=user_input)]},
-                config=CONFIG,
-                stream_mode="messages",
-            ):
-                # Handle tool messages
-                if isinstance(message_chunk, ToolMessage):
-                    tool_name = getattr(message_chunk, "name", "tool")
-                    if status_holder["box"] is None:
-                        status_holder["box"] = st.status(
-                            f"🔧 Using `{tool_name}` ...", expanded=True
-                        )
-                    else:
-                        status_holder["box"].update(
-                            label=f"🔧 Using `{tool_name}` ...",
-                            state="running",
-                            expanded=True,
-                        )
+            try:
+                for message_chunk, metadata in chatbot.stream(
+                    {"messages": [HumanMessage(content=user_input)]},
+                    config=CONFIG,
+                    stream_mode="messages",
+                ):
+                    # Handle tool messages
+                    if isinstance(message_chunk, ToolMessage):
+                        tool_name = getattr(message_chunk, "name", "tool")
+                        if status_holder["box"] is None:
+                            status_holder["box"] = st.status(
+                                f"🔧 Using `{tool_name}` ...", expanded=True
+                            )
+                        else:
+                            status_holder["box"].update(
+                                label=f"🔧 Using `{tool_name}` ...",
+                                state="running",
+                                expanded=True,
+                            )
 
-                # Stream assistant tokens
-                if isinstance(message_chunk, AIMessage):
-                    yield message_chunk.content
+                    # Stream assistant tokens
+                    if hasattr(message_chunk, "content"):
+                        yield message_chunk.content
+
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+                yield "Sorry, something went wrong. Please try again."
 
         ai_message = st.write_stream(ai_only_stream())
 
