@@ -1,178 +1,319 @@
-# LangGraph Chatbot
-
-An intelligent chatbot built with **LangGraph** and **Streamlit** that uses the Groq LLM with web search and stock price lookup capabilities.
-
-## 🚀 Features
-
-- **Multi-turn Conversations** - Persistent chat history with multiple threads
-- **Web Search** - Real-time web search using DuckDuckGo
-- **Stock Price Lookup** - Fetch live stock prices
-- **Streaming Responses** - Real-time response streaming
-- **Conversation Memory** - SQLite-based persistent storage
-- **Clean UI** - Modern Streamlit interface
-
-## 🧩 Technologies Used
+# 🤖 LangGraph Chatbot
 
 <p align="center">
-  <img src="https://media.giphy.com/media/l0Exk8EUzSLsrErEQ/giphy.gif" alt="Python GIF" width="120" />
-  <img src="https://media.giphy.com/media/3o7aCVf7QWv6gGEa44/giphy.gif" alt="Streamlit GIF" width="120" />
-  <img src="https://media.giphy.com/media/3owzWwyKKC4zQC8KQo/giphy.gif" alt="AI GIF" width="120" />
-  <img src="https://media.giphy.com/media/3oriO7A7bt1wsEP4cw/giphy.gif" alt="Database GIF" width="120" />
+  <img src="assets/banner.png" alt="LangGraph Chatbot Banner" width="100%">
 </p>
 
-Built with: **Python**, **Streamlit**, **LangGraph**, **Groq**, **DuckDuckGo Search**, and **SQLite**.
+<p align="center">
+  <b>An AI-powered chatbot built with LangGraph, Streamlit, and Groq featuring tool calling, conversation memory, and real-time streaming.</b>
+</p>
 
-## 📁 Project Structure
+<p align="center">
+
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-Agent-121212?style=for-the-badge)
+![LangChain](https://img.shields.io/badge/LangChain-00A67E?style=for-the-badge)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge\&logo=streamlit\&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-000000?style=for-the-badge)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge\&logo=sqlite\&logoColor=white)
+
+</p>
+
+---
+
+# ✨ Features
+
+* 💬 Multi-turn conversations
+* 🧠 Persistent conversation memory
+* 🌐 Web Search support
+* 📈 Live Stock Price Lookup
+* ⚡ Streaming AI responses
+* 🛠️ LangGraph tool calling
+* 🗂️ Multiple chat threads
+* 💾 SQLite persistence
+* 🎨 Modern Streamlit UI
+
+---
+
+# 🖥️ Demo
+
+<p align="center">
+<img src="assets/demo.png" width="90%">
+</p>
+
+---
+
+# 🏗️ Architecture
 
 ```
-langgraph-chatgpt/
+                User
+                  │
+                  ▼
+          Streamlit Frontend
+                  │
+                  ▼
+           LangGraph Agent
+                  │
+      ┌───────────┴───────────┐
+      │                       │
+      ▼                       ▼
+ Web Search Tool      Stock Price Tool
+      │                       │
+      └───────────┬───────────┘
+                  │
+                  ▼
+              Groq LLM
+                  │
+                  ▼
+          Streaming Response
+                  │
+                  ▼
+            SQLite Memory
+```
+
+---
+
+# 📂 Project Structure
+
+```
+langgraph-chatbot/
+
 ├── app/
-│   ├── backend/
-│   │   ├── __init__.py
-│   │   ├── agent.py          # Main LangGraph agent
-│   │   └── tools.py          # Tool definitions
-│   ├── frontend/
-│   │   ├── __init__.py
-│   │   └── app.py            # Streamlit UI
+│
+├── backend/
+│   ├── agent.py
+│   ├── tools.py
 │   └── __init__.py
+│
+├── frontend/
+│   ├── app.py
+│   └── __init__.py
+│
 ├── config/
-│   ├── __init__.py
-│   └── settings.py           # Configuration
+│   └── settings.py
+│
 ├── data/
-│   └── chatbot.db            # SQLite database
+│   └── chatbot.db
+│
 ├── requirements.txt
 ├── .env.example
-├── .gitignore
-└── README.md
+├── README.md
+└── .gitignore
 ```
 
-## 🔧 Setup
+---
 
-### 1. Prerequisites
-- Python 3.8+
-- Groq API key (get it free at [console.groq.com](https://console.groq.com))
+# 🚀 Getting Started
 
-### 2. Install Dependencies
+## 1. Clone Repository
+
+```bash
+git clone https://github.com/yourusername/langgraph-chatbot.git
+
+cd langgraph-chatbot
+```
+
+---
+
+## 2. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure Environment
+---
 
-Copy `.env.example` to `.env` and add your API keys:
+## 3. Configure Environment
 
-```bash
-cp .env.example .env
-```
+Create a `.env` file:
 
-Edit `.env`:
 ```env
-GROQ_API_KEY=your_actual_groq_api_key
+GROQ_API_KEY=your_api_key
+
 GROQ_MODEL=llama-3.1-8b-instant
+
 DATABASE_PATH=data/chatbot.db
 ```
 
-## 🏃 Running Locally
+---
 
-### Development Mode
+## 4. Run
 
 ```bash
 streamlit run app/frontend/app.py
 ```
 
-The app will open at `http://localhost:8501`
+Application:
 
-## 📤 Deploy on Streamlit Cloud
+```
+http://localhost:8501
+```
 
-### Step 1: Push to GitHub
+---
+
+# 🔧 Available Tools
+
+## 🌐 Web Search
+
+Example:
+
+```
+Search latest AI news
+```
+
+Uses DuckDuckGo for real-time information.
+
+---
+
+## 📈 Stock Price Lookup
+
+Example:
+
+```
+What is the current price of AAPL?
+```
+
+Fetches live stock prices.
+
+---
+
+# 🗄️ Conversation Flow
+
+```
+User Message
+      │
+      ▼
+LangGraph Agent
+      │
+      ▼
+Need Tool?
+  │        │
+ No       Yes
+  │         │
+  │     Execute Tool
+  │         │
+  └────► Groq LLM
+            │
+            ▼
+     Stream Response
+            │
+            ▼
+      Store in SQLite
+```
+
+---
+
+# ☁️ Deploy on Streamlit Cloud
+
+## Push Code
 
 ```bash
 git init
+
 git add .
-git commit -m "Initial commit"
+
+git commit -m "Initial Commit"
+
 git remote add origin https://github.com/yourusername/langgraph-chatbot.git
+
 git push -u origin main
 ```
 
-### Step 2: Create Streamlit Account
+## Deploy
 
-1. Go to [streamlit.io](https://streamlit.io)
-2. Sign up with GitHub
-3. Authorize Streamlit to access your GitHub repositories
-
-### Step 3: Deploy App
-
-1. Click "New app" on Streamlit Cloud dashboard
-2. Select your GitHub repository
-3. Choose branch: `main`
-4. Set main file path: `app/frontend/app.py`
-5. Click "Deploy"
-
-### Step 4: Add Secrets
-
-1. Go to your app's settings
-2. Click "Secrets"
-3. Add your environment variables:
+* Create a Streamlit Cloud account
+* Connect your GitHub repository
+* Select:
 
 ```
-GROQ_API_KEY = "your_actual_groq_api_key"
-GROQ_MODEL = "llama-3.1-8b-instant"
-DATABASE_PATH = "data/chatbot.db"
+Branch:
+main
+
+Main file:
+app/frontend/app.py
 ```
 
-### Step 5: Done! 🎉
+Add Secrets:
 
-Your app is now live on Streamlit Cloud. Share the public URL with others!
+```text
+GROQ_API_KEY="your_key"
 
-## 📊 How It Works
+GROQ_MODEL="llama-3.1-8b-instant"
 
-1. **User sends message** → Stored in session state
-2. **LLM processes** → Decides if tools are needed
-3. **Tools execute** → Web search or stock lookup (if needed)
-4. **Response streams** → Real-time to user interface
-5. **Conversation persists** → Saved in SQLite database
+DATABASE_PATH="data/chatbot.db"
+```
 
-## 🛠️ Tools Available
+Click **Deploy** 🎉
 
-### Web Search
-- Searches the web using DuckDuckGo
-- Usage: "Search for AI trends 2024"
+---
 
-### Stock Price
-- Fetches real-time stock prices
-- Usage: "What's the current price of AAPL?"
+# ⚙️ Environment Variables
 
-## 📝 Environment Variables
+| Variable        | Description     |
+| --------------- | --------------- |
+| GROQ_API_KEY    | Groq API Key    |
+| GROQ_MODEL      | Model Name      |
+| DATABASE_PATH   | SQLite Database |
+| STREAMLIT_THEME | UI Theme        |
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GROQ_API_KEY` | Your Groq API key | Required |
-| `GROQ_MODEL` | LLM model to use | `llama-3.1-8b-instant` |
-| `DATABASE_PATH` | SQLite database location | `data/chatbot.db` |
-| `STREAMLIT_THEME` | UI theme | `light` |
+---
 
-## 🐛 Troubleshooting
+# 🐞 Troubleshooting
 
-**Issue: "No such file or directory: 'data/chatbot.db'"**
-- Solution: The database will be created automatically on first run
+### Database Missing
 
-**Issue: "GROQ_API_KEY not found"**
-- Solution: Ensure `.env` file is created and GROQ_API_KEY is set correctly
+```
+No such file: chatbot.db
+```
 
-**Issue: Tools not working**
-- Solution: Check your internet connection and API key validity
+✅ The database is automatically created on first run.
 
-## 📚 Learn More
+---
 
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
-- [Streamlit Documentation](https://docs.streamlit.io/)
-- [Groq API Documentation](https://console.groq.com/docs)
+### API Key Missing
 
-## 📄 License
+```
+GROQ_API_KEY not found
+```
 
-MIT License - feel free to use this project for learning and building!
+✅ Add the key to your `.env` or Streamlit Secrets.
 
-## 👨‍💻 Author
+---
 
-Built with ❤️ using LangGraph and Streamlit
+### Tools Not Working
+
+* Verify internet connectivity
+* Verify API credentials
+* Restart the application
+
+---
+
+# 📚 Tech Stack
+
+* Python
+* LangGraph
+* LangChain
+* Streamlit
+* Groq
+* DuckDuckGo Search
+* SQLite
+
+---
+
+# ⭐ Support
+
+If you found this project useful, consider giving it a **⭐ Star** on GitHub.
+
+It helps others discover the project and motivates further development.
+
+---
+
+# 📄 License
+
+MIT License
+
+---
+
+# 👨‍💻 Author
+
+Built with ❤️ using **LangGraph**, **Streamlit**, and **Groq**.

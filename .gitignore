@@ -51,3 +51,6 @@ chatbot.db-shm
 #previous files
 chatbot_backend.py
 chatbot_frontend.py
+
+#txt files
+feat.txt
