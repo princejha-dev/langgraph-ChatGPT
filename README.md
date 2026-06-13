@@ -82,11 +82,15 @@ langgraph-chatbot/
 │
 ├── backend/
 │   ├── agent.py
+│   ├── nodes.py
+│   ├── state.py
 │   ├── tools.py
 │   └── __init__.py
 │
 ├── frontend/
 │   ├── app.py
+│   ├── ui.py
+│   ├── utils.py
 │   └── __init__.py
 │
 ├── config/
@@ -161,7 +165,7 @@ Example:
 Search latest AI news
 ```
 
-Uses DuckDuckGo for real-time information.
+Uses Tavily Search for real-time information.
 
 ---
 
@@ -295,7 +299,7 @@ GROQ_API_KEY not found
 * LangChain
 * Streamlit
 * Groq
-* DuckDuckGo Search
+* Tavily Search
 * SQLite
 
 ---

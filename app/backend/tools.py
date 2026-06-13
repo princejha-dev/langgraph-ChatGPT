@@ -4,16 +4,7 @@ import requests
 from langchain.tools import tool
 from langchain_community.tools import DuckDuckGoSearchResults
 from langchain_tavily import TavilySearch
-from dotenv import load_dotenv
-
-# Load variables from .env into os.environ
-load_dotenv()
-
-# Tools api key
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-
-# Search Tool
-#search_tool = DuckDuckGoSearchResults(region="us-en")
+from config.settings import TAVILY_API_KEY
 
 
 @tool
@@ -34,7 +25,8 @@ def web_search(query: str) -> dict:
     """
     tool = TavilySearch(
         max_results=5,
-        topic="general"
+        topic="general",
+        api_key=TAVILY_API_KEY
     )
 
     result = tool.invoke({"query":query})
