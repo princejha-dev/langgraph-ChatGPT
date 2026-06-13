@@ -6,7 +6,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.prebuilt import ToolNode, tools_condition
 
 from app.backend.state import ChatState
-from app.backend.nodes import chat_node
+from app.backend.nodes import chat_node, summarization_node, should_summarize
 from app.backend.tools import tools
 from config.settings import DATABASE_PATH
 
@@ -22,10 +22,28 @@ checkpointer = SqliteSaver(conn=conn)
 graph = StateGraph(ChatState)
 graph.add_node("chat_node", chat_node)
 graph.add_node("tools", tool_node)
+graph.add_node("summarization_node", summarization_node)
 
 graph.add_edge(START, "chat_node")
-graph.add_conditional_edges("chat_node", tools_condition)
+
+# Single router: after chat_node, go to tools (if tool_calls), summarization_node (if >10 msgs), or END
+def route_after_chat(state: ChatState):
+    last = state["messages"][-1]
+    if hasattr(last, "tool_calls") and last.tool_calls:
+        return "tools"
+    if should_summarize(state):
+        return "summarization_node"
+    return END
+
+graph.add_conditional_edges(
+    "chat_node",
+    route_after_chat,
+    {"tools": "tools", "summarization_node": "summarization_node", END: END}
+)
+
+# After tools run, go back to chat_node for the final answer
 graph.add_edge("tools", "chat_node")
+graph.add_edge("summarization_node", END)
 
 # Compile chatbot
 chatbot = graph.compile(checkpointer=checkpointer)

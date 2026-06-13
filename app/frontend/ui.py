@@ -25,6 +25,8 @@ def render_sidebar():
                         if isinstance(msg, HumanMessage):
                             role = "user"
                         elif isinstance(msg, AIMessage):
+                            if not msg.content:
+                                continue
                             role = "assistant"
                         else:
                             continue

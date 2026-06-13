@@ -1,5 +1,6 @@
 """Tools for the chatbot agent"""
 import os
+import json
 import requests
 from langchain.tools import tool
 from langchain_community.tools import DuckDuckGoSearchResults
@@ -24,12 +25,33 @@ def web_search(query: str) -> dict:
     Returns structured search results such as snippets, links, and metadata.
     """
     tool = TavilySearch(
-        max_results=5,
+        max_results=3,
         topic="general",
         api_key=TAVILY_API_KEY
     )
 
     result = tool.invoke({"query":query})
+    
+    # Extract title, url, and content from each result
+    try:
+        if isinstance(result, str):
+            parsed = json.loads(result)
+        else:
+            parsed = result
+
+        if isinstance(parsed, list):
+            parts = []
+            for item in parsed:
+                if not isinstance(item, dict):
+                    continue
+                title = item.get("title", "")
+                url = item.get("url", "")
+                content = item.get("content", "")
+                parts.append(f"**{title}**\n{url}\n{content}")
+            if parts:
+                return "\n\n---\n\n".join(parts)
+    except Exception:
+        pass
 
     return result
 
