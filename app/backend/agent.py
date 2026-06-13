@@ -3,7 +3,7 @@ import sqlite3
 import os
 from typing import TypedDict, Annotated
 from dotenv import load_dotenv
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, AIMessage, SystemMessage
 from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
@@ -37,12 +37,25 @@ def chat_node(state: ChatState):
         max_tokens= MAX_TOKENS
     )
 
+    system_prompt = SystemMessage(
+    content="""
+    You are a helpful, accurate, and concise AI assistant.
+
+    - Answer directly when possible.
+    - Use available tools only when needed.
+    - Never expose internal reasoning or tool outputs.
+    - After using a tool, provide a natural final answer.
+    - If uncertain, be honest instead of inventing information.
+    """
+    )
+
     try:
-        response = llm_with_tools.invoke(messages)
+        response = llm_with_tools.invoke([system_prompt] + messages)
         return {"messages": [response]}
     except Exception as e:
         print("Groq Error:", repr(e))
-        raise
+        return {"messages": [AIMessage(content="Sorry, something went wrong. Please try again.")]}
+
 
 
 # Initialize tool node

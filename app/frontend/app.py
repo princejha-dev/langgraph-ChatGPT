@@ -76,12 +76,19 @@ with st.sidebar:
     for thread_id in st.session_state["chat_threads"][::-1]:
         col1, col2 = st.columns([4, 1])
         with col1:
-            if st.button(f"📌 {str(thread_id)[:8]}...", key=f"thread_{thread_id}"):
+            if st.button(f"📌 {str(thread_id)[:20]}", key=f"thread_{thread_id}"):
                 st.session_state["thread_id"] = thread_id
                 messages = load_conversation(thread_id)
                 temp_messages = []
                 for msg in messages:
-                    role = "user" if isinstance(msg, HumanMessage) else "assistant"
+
+                    if isinstance(msg,HumanMessage):
+                        role = "user"
+                    elif isinstance(msg,AIMessage):
+                        role = "assistant"
+                    else:
+                        continue
+
                     temp_messages.append({"role": role, "content": msg.content})
                 st.session_state["message_history"] = temp_messages
                 st.rerun()
@@ -89,7 +96,7 @@ with st.sidebar:
 
 # ============ Main Chat Area ============
 st.header("🤖 Agentic Chatbot")
-st.markdown("Ask me anything! I am an Agentic chatbot.")
+st.markdown("I am here to help you, Ask me anything!")
 
 # Display conversation history
 for message in st.session_state["message_history"]:
@@ -138,12 +145,13 @@ if user_input:
                             )
 
                     # Stream assistant tokens
-                    if hasattr(message_chunk, "content"):
-                        yield message_chunk.content
+                    if isinstance(message_chunk, AIMessage):
+                        if message_chunk.content:
+                            yield message_chunk.content
 
             except Exception as e:
                 st.error(f"Error: {str(e)}")
-                yield "Sorry, something went wrong. Please try again."
+                
 
         ai_message = st.write_stream(ai_only_stream())
 
@@ -154,6 +162,7 @@ if user_input:
             )
 
     # Save assistant message
-    st.session_state["message_history"].append(
-        {"role": "assistant", "content": ai_message}
-    )
+    if ai_message:
+        st.session_state["message_history"].append(
+            {"role": "assistant", "content": ai_message}
+        )
