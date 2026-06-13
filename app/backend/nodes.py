@@ -1,5 +1,6 @@
+from streamlit.runtime.state.session_state import KeyIdMapper
 import re
-from langchain_core.messages import HumanMessage, RemoveMessage
+from langchain_core.messages import HumanMessage, RemoveMessage, ToolMessage
 from langchain_core.messages import AIMessage, SystemMessage
 from langchain_groq import ChatGroq
 
@@ -13,6 +14,12 @@ llm = ChatGroq(
     api_key=GROQ_API_KEY
 )
 llm_with_tools = llm.bind_tools(tools)
+
+#llm for summarization
+summary_llm = ChatGroq(
+    model="llama-3.1-8b-instant",
+    api_key=GROQ_API_KEY
+)
 
 def _strip_think(text: str) -> str:
     """Strip <think>...</think> blocks emitted by thinking models."""
@@ -58,23 +65,42 @@ def chat_node(state: ChatState):
 
 def summarization_node(state: ChatState):
 
-    existing_summary = state.get('summary', '')
+    keep_recent = 10
+    existing_summary = state.get("summary","")
 
-    # Build summarization prompt
-    if existing_summary:
-        prompt = (
-            f"Existing summary:\n{existing_summary}\n\n"
-            "Extend the summary using the new conversation above."
-        )
-    else:
-        prompt = "Summarize the conversation above."
+    messages_to_summarize = [
+        m for m in state['messages'][:-keep_recent] if not isinstance(m,ToolMessage)
+    ]
 
-    messages_for_summary = state['messages'] + [HumanMessage(content=prompt)]
+    summary_prompt = HumanMessage(
+        content=f"""
+        Current summary:
+        
+        {existing_summary}
+        
+        update this summary using the following conversation.
+        
+        Keep:
+        - user preferences
+        - important facts
+        - decisions made
+        - unresolved questions
+        
+        Remove:
+        - greetings
+        - repetitive information
+        - temporary details
+        """
+    )
 
-    response = llm.invoke(messages_for_summary)
+    messages_for_summary = (
+        messages_to_summarize + [summary_prompt]
+    )
 
-    # Keep only last 2 messages verbatim, delete the rest
-    messages_to_delete = state["messages"][:-2]
+    response = summary_llm.invoke(messages_for_summary)
+
+    # Keep only lastest messages verbatim, delete the rest
+    messages_to_delete = state["messages"][:-keep_recent]
 
     return {
         "summary": response.content,   # store the string, not the AIMessage object
@@ -82,4 +108,5 @@ def summarization_node(state: ChatState):
     }
 
 def should_summarize(state: ChatState):
-    return len(state["messages"]) > 10
+    summary_threshold = 50
+    return len(state["messages"]) > summary_threshold
