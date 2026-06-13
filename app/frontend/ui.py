@@ -1,7 +1,12 @@
+import re
 import streamlit as st
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from app.backend.agent import chatbot
 from app.frontend.utils import reset_chat, load_conversation
+
+def strip_think_tags(text: str) -> str:
+    """Remove <think>...</think> blocks (used for history display)."""
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
 def render_sidebar():
     with st.sidebar:
@@ -30,7 +35,7 @@ def render_sidebar():
                             role = "assistant"
                         else:
                             continue
-                        temp_messages.append({"role": role, "content": msg.content})
+                        temp_messages.append({"role": role, "content": strip_think_tags(msg.content)})
                     st.session_state["message_history"] = temp_messages
                     st.rerun()
 
@@ -64,14 +69,20 @@ def render_chat():
             status_holder = {"box": None}
 
             def ai_only_stream():
+                # Stateful buffer to handle <think> blocks that span multiple stream chunks
+                buffer = ""
+                inside_think = False
                 try:
                     for message_chunk, metadata in chatbot.stream(
                         {"messages": [HumanMessage(content=user_input)]},
                         config=CONFIG,
                         stream_mode="messages",
                     ):
-                        # Handle tool messages
-                        if isinstance(message_chunk, ToolMessage):
+                        # Only process messages from chat_node — ignore summarization_node LLM calls
+                        node_name = metadata.get("langgraph_node", "")
+
+                        # Handle tool status display (tools node)
+                        if isinstance(message_chunk, ToolMessage) and node_name == "tools":
                             tool_name = getattr(message_chunk, "name", "tool")
                             if status_holder["box"] is None:
                                 status_holder["box"] = st.status(
@@ -84,10 +95,35 @@ def render_chat():
                                     expanded=True,
                                 )
 
-                        # Stream assistant tokens
-                        if isinstance(message_chunk, AIMessage):
-                            if message_chunk.content:
-                                yield message_chunk.content
+                        # Stream assistant tokens — only from chat_node
+                        if isinstance(message_chunk, AIMessage) and node_name == "chat_node":
+                            # Skip chunks that only carry tool_calls (pre-tool reasoning)
+                            if getattr(message_chunk, "tool_calls", None):
+                                continue
+                            if not message_chunk.content:
+                                continue
+
+                            buffer += message_chunk.content
+
+                            # Yield content outside <think>...</think> blocks
+                            while buffer:
+                                if inside_think:
+                                    end = buffer.find("</think>")
+                                    if end == -1:
+                                        buffer = ""  # still inside think block, consume all
+                                        break
+                                    buffer = buffer[end + len("</think>"):]
+                                    inside_think = False
+                                else:
+                                    start = buffer.find("<think>")
+                                    if start == -1:
+                                        yield buffer
+                                        buffer = ""
+                                        break
+                                    if start > 0:
+                                        yield buffer[:start]  # yield text before <think>
+                                    buffer = buffer[start + len("<think>"):]
+                                    inside_think = True
 
                 except Exception as e:
                     st.error(f"Error: {str(e)}")

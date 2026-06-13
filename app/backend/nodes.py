@@ -1,3 +1,4 @@
+import re
 from langchain_core.messages import HumanMessage, RemoveMessage
 from langchain_core.messages import AIMessage, SystemMessage
 from langchain_groq import ChatGroq
@@ -12,6 +13,10 @@ llm = ChatGroq(
     api_key=GROQ_API_KEY
 )
 llm_with_tools = llm.bind_tools(tools)
+
+def _strip_think(text: str) -> str:
+    """Strip <think>...</think> blocks emitted by thinking models."""
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
 
 def chat_node(state: ChatState):
     messages = []
@@ -31,16 +36,20 @@ def chat_node(state: ChatState):
 
     CRITICAL INSTRUCTIONS:
     - Answer directly from your own knowledge when possible.
-    - ONLY use tools if the user asks for real-time information (e.g. current stock prices, recent news) or specifically requests a search.
-    - DO NOT use tools recurrently or multiple times for the same query unless explicitly needed.
-    - Once you receive the tool's output, provide the final answer immediately without calling more tools.
-    - Never expose internal reasoning or tool outputs directly.
-    - If uncertain, be honest instead of inventing information.
+    - ONLY use tools for real-time or live data (e.g. live stock prices, breaking news, current events).
+    - When you decide to call a tool, output ONLY the tool call. Do NOT write any text or partial answer before calling the tool.
+    - After receiving tool results, give one clean final answer.
+    - DO NOT call the same tool more than once per user query.
+    - Never expose raw tool outputs or internal reasoning.
+    - If uncertain about something not requiring live data, say so honestly.
     """
     )
 
     try:
         response = llm_with_tools.invoke([system_prompt] + messages)
+        # Strip think-block content before storing in checkpointer
+        if response.content:
+            response.content = _strip_think(response.content)
         return {"messages": [response]}
     except Exception as e:
         print("Groq Error:", repr(e))

@@ -24,13 +24,13 @@
 # ✨ Features
 
 * 💬 Multi-turn conversations
-* 🧠 Persistent conversation memory
-* 🌐 Web Search support
+* 🧠 Persistent conversation memory (SQLite)
+* 📝 Automatic summarization for long chats (context window management)
+* 🌐 Web Search via Tavily
 * 📈 Live Stock Price Lookup
-* ⚡ Streaming AI responses
-* 🛠️ LangGraph tool calling
+* ⚡ Real-time streaming AI responses
+* 🛠️ LangGraph tool calling with smart routing
 * 🗂️ Multiple chat threads
-* 💾 SQLite persistence
 * 🎨 Modern Streamlit UI
 
 ---
@@ -54,12 +54,13 @@
                   ▼
            LangGraph Agent
                   │
-      ┌───────────┴───────────┐
-      │                       │
-      ▼                       ▼
- Web Search Tool      Stock Price Tool
-      │                       │
-      └───────────┬───────────┘
+        ┌─────────┴──────────┐
+        │                    │
+        ▼                    ▼
+   Tool Calling       Summarization Node
+  (Web / Stock)    (context window mgmt)
+        │                    │
+        └─────────┬──────────┘
                   │
                   ▼
               Groq LLM
@@ -132,10 +133,13 @@ pip install -r requirements.txt
 Create a `.env` file:
 
 ```env
-GROQ_API_KEY=your_api_key
+GROQ_API_KEY=your_groq_api_key
+TAVILY_API_KEY=your_tavily_api_key
 
-GROQ_MODEL=llama-3.1-8b-instant
+# Optional: defaults to llama-3.3-70b-versatile
+GROQ_MODEL=llama-3.3-70b-versatile
 
+# Optional: defaults to <project_root>/data/chatbot.db
 DATABASE_PATH=data/chatbot.db
 ```
 
@@ -187,22 +191,25 @@ Fetches live stock prices.
 User Message
       │
       ▼
-LangGraph Agent
+chat_node (Groq LLM)
       │
-      ▼
-Need Tool?
-  │        │
- No       Yes
-  │         │
-  │     Execute Tool
-  │         │
-  └────► Groq LLM
-            │
-            ▼
-     Stream Response
-            │
-            ▼
-      Store in SQLite
+      ├── Has tool_calls? ──► tools node ──► back to chat_node
+      │
+      └── No tool_calls?
+               │
+               ├── messages > 10? ──► summarization_node
+               │                         │
+               │                    Summarizes old msgs,
+               │                    stores in `summary`,
+               │                    deletes old messages
+               │                         │
+               └─────────────────────────┘
+                             │
+                             ▼
+                       Stream Response
+                             │
+                             ▼
+                       Store in SQLite
 ```
 
 ---

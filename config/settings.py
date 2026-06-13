@@ -10,7 +10,7 @@ TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 # LLM Configuration
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3-32b")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 # Database Configuration
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
