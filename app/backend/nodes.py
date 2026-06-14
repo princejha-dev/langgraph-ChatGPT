@@ -1,4 +1,3 @@
-from streamlit.runtime.state.session_state import KeyIdMapper
 import re
 from langchain_core.messages import HumanMessage, RemoveMessage, ToolMessage
 from langchain_core.messages import AIMessage, SystemMessage
@@ -65,7 +64,7 @@ def chat_node(state: ChatState):
 
 def summarization_node(state: ChatState):
 
-    keep_recent = 10
+    keep_recent = 6
     existing_summary = state.get("summary","")
 
     messages_to_summarize = [
@@ -73,25 +72,13 @@ def summarization_node(state: ChatState):
     ]
 
     summary_prompt = HumanMessage(
-        content=f"""
-        Current summary:
-        
-        {existing_summary}
-        
-        update this summary using the following conversation.
-        
-        Keep:
-        - user preferences
-        - important facts
-        - decisions made
-        - unresolved questions
-        
-        Remove:
-        - greetings
-        - repetitive information
-        - temporary details
-        """
-    )
+        content=f"""Summarize the conversation above into 3-6 short bullet points.
+        Each bullet must be one sentence max.
+        Focus only on: key facts, user preferences, decisions, unresolved questions.
+        Skip: greetings, recipes/code details, filler content.
+        {'Existing summary to update: ' + existing_summary if existing_summary else ''}
+        Output only the bullets, no headers, no extra text."""
+            )
 
     messages_for_summary = (
         messages_to_summarize + [summary_prompt]
@@ -108,5 +95,5 @@ def summarization_node(state: ChatState):
     }
 
 def should_summarize(state: ChatState):
-    summary_threshold = 50
+    summary_threshold = 16
     return len(state["messages"]) > summary_threshold

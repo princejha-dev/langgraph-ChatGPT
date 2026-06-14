@@ -9,3 +9,4 @@ requests
 langgraph-checkpoint-sqlite
 ddgs
 langchain_tavily
+langsmith
